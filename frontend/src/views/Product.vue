@@ -2,7 +2,7 @@
   <v-container>
     <v-row class="text-center">
       <v-col>
-        This is product
+        This is product Page!
       </v-col>
     </v-row>
   </v-container>
