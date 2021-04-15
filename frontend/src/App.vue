@@ -19,7 +19,11 @@
           <v-icon>mdi-thermometer</v-icon>
         </v-btn>
 
-        <v-btn color="white" value="Product" @click="moveToPage('Product')">
+        <v-btn
+          color="white"
+          value="ProductList"
+          @click="moveToPage('ProductList')"
+        >
           재고관리
           <v-icon>mdi-database</v-icon>
         </v-btn>

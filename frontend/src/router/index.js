@@ -1,7 +1,7 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 import Temperature from "../views/Temperature.vue";
-import Product from "../views/Product.vue";
+import ProductList from "../views/ProductList.vue";
 
 Vue.use(VueRouter);
 
@@ -12,9 +12,9 @@ const routes = [
     component: Temperature,
   },
   {
-    path: "/product",
-    name: "Product",
-    component: Product,
+    path: "/productList",
+    name: "ProductList",
+    component: ProductList,
   },
 ];
 
