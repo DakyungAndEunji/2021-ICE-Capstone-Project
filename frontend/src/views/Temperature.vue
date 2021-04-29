@@ -5,7 +5,7 @@
     </v-row>
     <v-row class="text-center">
       <v-col>
-        <v-icon v-if="IsTempInRange" size="80" color="blue darken-1">
+        <v-icon v-if="tempCheck" size="80" color="blue darken-1">
           mdi-emoticon
         </v-icon>
         <v-icon v-else size="80" color="red darken-1">
@@ -76,13 +76,12 @@
 
 export default {
   data: () => ({
-    temp: 0,
-    upper: 0,
-    lower: 0,
+    temp: 17,
+    upper: 23,
+    lower: 10,
     upperChange: 0,
     lowerChange: 0,
     dialog: false,
-    tempCheck: true,
     errormsg: "",
     isLoading: false,
   }),
@@ -91,18 +90,19 @@ export default {
     this.update();
     // 소켓처리 하면 더 좋을텐데..
   },
-  methods: {
-    IsTempInRange() {
-      if (this.temp >= this.lower && this.temp <= this.upper)
-        this.tempCheck = true;
-      else this.tempCheck = false;
+  computed: {
+    tempCheck() {
+      if (this.temp >= this.lower && this.temp <= this.upper) return true;
+      else return false;
     },
+  },
+  methods: {
     update() {},
     close() {
       if (
         this.lowerChange === "" ||
         this.upperChange === "" ||
-        this.lowerChange > this.upperChange
+        this.lowerChange * 1 > this.upperChange * 1
       ) {
         this.errormsg = "온도 범위를 정확히 입력해주세요.";
         return;
