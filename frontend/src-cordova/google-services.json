@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "91305139301",
+    "project_id": "temperature-push-service",
+    "storage_bucket": "temperature-push-service.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:91305139301:android:3b9de2feb88fe9fa637a8c",
+        "android_client_info": {
+          "package_name": "com.temperature.checker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "91305139301-1m8r4cosag52hi67abdkl0ahjuiedhbs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKXRXgHFd1T_9gmGzATHxWus8IN5S8IiA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "91305139301-1m8r4cosag52hi67abdkl0ahjuiedhbs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "91305139301-bgrh5chne94vr8c6hs8i5nbdp9af5k75.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.temperature.manager"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
