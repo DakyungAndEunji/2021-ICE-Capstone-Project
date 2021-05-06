@@ -1,13 +1,18 @@
+### flaskr/__init__.py
+
 import os
 from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 
-def create_app(test_config=None):
+db = SQLAlchemy()
+
+def create_app(test_config = None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
-    app.config.from_mapping(
-        SECRET_KEY='dev',
-        DATABASE=os.path.join(app.instance_path,'flaskr.sqlite'),
-    )
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:toor!@localhost:3306/tps?charset=utf8'
+    app.config['SQLALCHEMY_ECHO'] = True
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+    app.secret_key = 'manyrandombyte'
 
     if test_config is None:
         # Load the instance config, if it exists, when not testing
@@ -21,3 +26,14 @@ def create_app(test_config=None):
         os.makedirs(app.instance_path)
     except OSError:
         pass
+
+    db.init_app(app)
+    
+    with app.app_context():
+        db.create_all()
+
+    from flaskr.view import productController
+
+    app.register_blueprint(productController.bp)
+
+    return app
