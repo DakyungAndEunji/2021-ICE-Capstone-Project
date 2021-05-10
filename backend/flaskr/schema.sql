@@ -1,17 +1,17 @@
-use CAP;
-SET NAMES utf8mb4;
-SET FOREIGN_KEY_CHECKS = 0;
+use tps;
+SET FOREIGN_KEY_CHECKS = 0
 
 -- ----------------------------
 -- Table structure for product
 -- ----------------------------
 DROP TABLE IF EXISTS `product`;
 CREATE TABLE `product` (
+  `product_id` INTEGER NOT NULL auto_increment COMMENT '상품아이디',
   `product_name` varchar(30) NOT NULL COMMENT '이름',
   `product_price` INTEGER NOT NULL DEFAULT 0 COMMENT '상품가격',
   `product_sales` INTEGER NOT NULL DEFAULT 0 COMMENT '상품판매가',
   `product_num` INTEGER NOT NULL DEFAULT 0 COMMENT '상품수량',
-  PRIMARY KEY (`product_name`)
+  PRIMARY KEY (`product_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ----------------------------
