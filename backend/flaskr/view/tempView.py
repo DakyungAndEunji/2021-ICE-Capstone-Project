@@ -14,10 +14,17 @@ def read_temp():
     except Exception as e:
         return {'error': str(e)}, 500
 
-@api.route('', methods=['PATCH'])
+@api.route('/range', methods=['GET'])
+def read_tempRange():
+    try:
+        return tempService.read_tempRange()
+    except Exception as e:
+        return {'error': str(e)}, 500
+
+@api.route('/range', methods=['PATCH'])
 def tempPatch():
     try:
         range = request.json
-        return tempService.update_temp(range)
+        return tempService.update_tempRange(range)
     except Exception as e:
         return {"error": str(e)}

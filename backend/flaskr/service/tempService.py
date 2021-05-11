@@ -30,7 +30,7 @@ def read_temp_raw():
     #else  # flask서버로 온도 값 전송
     #return render_template('post.html')
 
-def update_temp(data):
+def update_tempRange(data):
     # 사용자가 입력한 온도 범위를 서버로 받아오는 것
     # DB에 값 저장
     #초기값이 없으면 가져와야지
@@ -38,6 +38,8 @@ def update_temp(data):
         if not data:
             return {"message":"no content, enter the range of the temperature"}, 400
         tempRange = TempDao.query.first()
+        up = data['upper']
+        low = data['lower']
         if not tempRange:
             new_temp = TempDao(upper=up, lower=low)
             save_changes(new_temp)
@@ -56,4 +58,5 @@ def update_temp(data):
     #데이터베이스.patch('/tempdb', {'upper': u, 'lower': l})
     #return '', 204
 
-
+def read_tempRange():
+    return TempDao.query.first().as_dict()
