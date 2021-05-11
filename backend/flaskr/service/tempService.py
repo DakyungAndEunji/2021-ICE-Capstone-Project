@@ -5,6 +5,10 @@ from . import save_changes
 import time
 import json
 
+# custom 400 error handler
+def bad_request():
+    return {"status": "Bad request", "message":"Please enter the correct value."}, 400
+
 def read_temp():  # 현재 온도 값 가져오기
     tempRange = TempDao.query.first().as_dict()
     lines = read_temp_raw()
@@ -36,19 +40,32 @@ def update_tempRange(data):
     #초기값이 없으면 가져와야지
     try:
         if not data:
-            return {"message":"no content, enter the range of the temperature"}, 400
+            return bad_request()
         tempRange = TempDao.query.first()
-        up = data['upper']
-        low = data['lower']
         if not tempRange:
             new_temp = TempDao(upper=up, lower=low)
             save_changes(new_temp)
         else:
-            if up!=tempRange.upper:
-                tempRange.upper=up
-            if low==tempRange.lower:
-                tempRange.lower=low
-        return { "message" : "complite" }, 200
+            new_temp = TempDao(tempRange.upper, tempRange.lower)
+            if 'upper' in data:
+                if str(type(data['upper']))!="<class 'int'>":
+                    return bad_request()
+                new_temp.upper=data['upper']
+            if 'lower' in data:
+                if str(type(data['lower']))!="<class 'int'>":
+                    return bad_request()
+                new_temp.lower=data['lower']
+
+            if new_temp.upper<new_temp.lower:
+                return bad_request()
+            
+            new_temp, tempRange = tempRange, new_temp
+            response_object = {
+                "status": "success",
+                "message": "Successfully updated.",
+                "result" : tempRange.as_dict()
+            }
+        return response_object, 200
         #db에 저장된 온도 값 가져오기
     except Exception as e:
         return { "error": str(e) }, 500
