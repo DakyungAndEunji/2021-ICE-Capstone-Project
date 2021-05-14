@@ -7,21 +7,21 @@ bp = Blueprint('main', __name__, url_prefix='/api/product')
 def createProduct():
     try:
         item = request.json
-        return productService.createNewProduct(item)
+        return productService.createNewItem(item)
     except Exception as e:
         return {"error":str(e)}, 500
 
 @bp.route('', methods = ['GET'])
 def productList():
     try:
-        return productService.getAllProducts()
+        return productService.getAllItems()
     except Exception as e:
         return {"error":str(e)}, 500
 
 @bp.route('/<int:product_id>', methods = ['GET'])
 def getProduct(product_id):
     try:
-        return productService.getAProduct(product_id)
+        return productService.getAItem(product_id)
     except Exception as e:
         return {"error":str(e)}, 500
 
@@ -29,14 +29,13 @@ def getProduct(product_id):
 def updateProduct(product_id):
     try:
         item = request.json
-        return productService.updateProduct(product_id, item)
+        return productService.updateItem(product_id, item)
     except Exception as e:
         return {"error":str(e)}
 
 @bp.route('/<int:product_id>', methods = ['DELETE'])
 def deleteProduct(product_id):
     try:
-#        item=ProductService.createNewProduct(item)
-        return jsonify({"message":"OK"}), 200
+        return productService.deleteItem(product_id)
     except Exception as e:
         return {"error":str(e)}
