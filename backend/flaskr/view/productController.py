@@ -7,7 +7,7 @@ bp = Blueprint('main', __name__, url_prefix='/api/product')
 def createProduct():
     try:
         item = request.json
-        return productService.createNewProduct(item)
+        return productService.createNewItem(item)
     except Exception as e:
         return {"error":str(e)}, 500
 
