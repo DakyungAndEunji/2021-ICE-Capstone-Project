@@ -60,8 +60,44 @@ def update_tempRange(data):
 
         tempRange = TempDao.query.first()
 
-        if not tempRange:
-        #if True:
+        #if not tempRange:
+        if True:
+            #new_temp = db.session.query(TempDao).first()
+            #new_temp.upper = data['upper']
+            #new_temp.lower = data['lower']
+            #db.session.add(TempDao(new_temp.upper, new_temp.lower))
+            #db.session.commit()
+            #response_object = {
+            #    "status0": "success",
+            #    "message0": "Successfully updated.",
+            #    "result0": new_temp  # new_temp  #new_temp.as_dict()
+            #}
+            #return jsonify(response_object)
+
+
+            #new_temp = TempDao(upper=data['upper'], lower=data['lower'])
+            #db.session.add(new_temp)
+            #db.session.commit()
+            #new_temp = TempDao.query.first().as_dict()
+            #response_object = {
+             #   "status0": "success",
+             #   "message0": "Successfully updated.",
+             #   "result0": new_temp  # new_temp  #new_temp.as_dict()
+            #}
+            #return jsonify(response_object)
+
+            new_temp = db.session.query(TempDao).first()
+            new_temp.upper = data['upper']
+            new_temp.lower = data['lower']
+            db.session.commit()
+            new_temp = TempDao.query.first().as_dict()
+            response_object = {
+                "status0": "success",
+                "message0": "Successfully updated.",
+                "result0": new_temp  # new_temp  #new_temp.as_dict()
+            }
+            return jsonify(response_object)
+
             # new_temp = {'upper': data['upper'], 'lower': data['lower']}
 
             # print(dict(new_temp)) #ok {'upper': 50, 'lower': 24}
@@ -82,12 +118,12 @@ def update_tempRange(data):
             #TempDao.query.update(new_temp)
             #db.session.commit()
 
-            new_temp = TempDao(upper=data['upper'], lower=data['lower'])
-            db.session.add([new_temp])
-            db.session.commit()
+            #new_temp = TempDao(upper=data['upper'], lower=data['lower'])
+            #db.session.add([new_temp])
+            #db.session.commit()
 
 
-            new_temp = TempDao.query.first().as_dict()
+            #new_temp = TempDao.query.first().as_dict()
 
             #new_range = TempDao(upper=data['upper'], lower=data['lower'])
             #db.session.add([new_range])
@@ -144,12 +180,12 @@ def update_tempRange(data):
 
             # save_changes(new_temp)
 
-            response_object = {
-                "status1": "success",
-                "message1": "Successfully updated.",
-                "result1": new_temp  # new_temp.as_dict()
-                }
-            return jsonify(response_object)
+            #response_object = {
+             #   "status1": "success",
+               # "message1": "Successfully updated.",
+                #"result1": new_temp  # new_temp.as_dict()
+                #}
+            #return jsonify(response_object)
 
         else:  # same range(upper or lower or both)
 
@@ -197,5 +233,4 @@ def read_tempRange():
     js = json.dumps(TempDao.query.first().as_dict())
     resp = Response(js, status=200, mimetype='application/json')
     return resp
-
     # return TempDao.query.first().as_dict()
