@@ -31,8 +31,8 @@ CREATE TABLE `order` (
 -- ----------------------------
 DROP TABLE IF EXISTS `temp`;
 CREATE TABLE `temp` (
-  `upper` INTEGER NOT NULL COMMENT '상한온도',
-  `lower` INTEGER NOT NULL COMMENT '하한온도',
+  `upper` FLOAT NOT NULL COMMENT '상한온도',
+  `lower` FLOAT NOT NULL COMMENT '하한온도',
   PRIMARY KEY (`upper`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

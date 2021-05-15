@@ -10,8 +10,8 @@ db = SQLAlchemy()
 def create_app(test_config = None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:toor!@localhost:3306/tps?charset=utf8'
-    # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:colferpi@localhost:3306/temp?charset=utf8'  # 이건 경이거^^
+    #app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:toor!@localhost:3306/tps?charset=utf8'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:colferpi@localhost:3306/temp?charset=utf8'  # 이건 경이거^^
     app.config['SQLALCHEMY_ECHO'] = True 
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
     app.secret_key = 'manyrandombyte'
