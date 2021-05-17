@@ -3,6 +3,7 @@
 from flask import jsonify
 from flaskr.model import Product
 from flaskr import db
+from . import save_changes
 
 def is_integer(string):
     try: 

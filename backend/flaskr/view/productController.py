@@ -1,9 +1,8 @@
 from flask import Flask, request, jsonify, Blueprint
 from flaskr.service import productService
+from . import product_api as api
 
-bp = Blueprint('main', __name__, url_prefix='/api/product')
-
-@bp.route('', methods = ['POST'])
+@api.route('', methods = ['POST'])
 def createProduct():
     try:
         item = request.json
@@ -11,21 +10,21 @@ def createProduct():
     except Exception as e:
         return {"error":str(e)}, 500
 
-@bp.route('', methods = ['GET'])
+@api.route('', methods = ['GET'])
 def productList():
     try:
         return productService.getAllItems()
     except Exception as e:
         return {"error":str(e)}, 500
 
-@bp.route('/<int:product_id>', methods = ['GET'])
+@api.route('/<int:product_id>', methods = ['GET'])
 def getProduct(product_id):
     try:
         return productService.getAItem(product_id)
     except Exception as e:
         return {"error":str(e)}, 500
 
-@bp.route('/<int:product_id>', methods = ['PATCH'])
+@api.route('/<int:product_id>', methods = ['PATCH'])
 def updateProduct(product_id):
     try:
         item = request.json
@@ -33,7 +32,7 @@ def updateProduct(product_id):
     except Exception as e:
         return {"error":str(e)}
 
-@bp.route('/<int:product_id>', methods = ['DELETE'])
+@api.route('/<int:product_id>', methods = ['DELETE'])
 def deleteProduct(product_id):
     try:
         return productService.deleteItem(product_id)
