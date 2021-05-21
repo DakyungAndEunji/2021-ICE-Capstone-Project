@@ -13,40 +13,77 @@ scancodes = {
 }
 
 
-def signal_handler(signal, frame):
-    print('Stopping')
-    dev.ungrab()
-    sys.exit(0)
+# def signal_handler(signal, frame):
+#     print('Stopping')
+#     dev.ungrab()
+#     sys.exit(0)
 
 
 # find usb hid device
-devices = map(InputDevice, list_devices())
-for device in devices:
-    # print(device.name, device.fn)
-    if barCodeDeviceString in device.name:
-        dev = InputDevice(device.path)
-    else:
-        print('No barcode device found')
-        sys.exit()
-signal.signal(signal.SIGINT, signal_handler)
-dev.grab()
-# process usb hid events and format barcode data
-barcode = ""
-try:
-    for event in dev.read_loop():
-        if event.type == ecodes.EV_KEY:
-            data = categorize(event)
-            if data.keystate == 1 and data.scancode != 42:  # Catch only keydown, and not Enter
-                key_lookup = scancodes.get(data.scancode) or u'UNKNOWN:{}'.format(
-                    data.scancode)  # lookup corresponding ascii value
-                if data.scancode == 28:  # if enter detected print barcode value and then clear it
-                    buff = barcode
-                    word = buff.split('/')
-                    # print(barcode)
-                    barcode = ""
-                    print(word[3], word[4])
-                else:
-                    barcode += key_lookup  # append character to barcode string
+# devices = map(InputDevice, list_devices())
+# for device in devices:
+#     # print(device.name, device.fn)
+#     if barCodeDeviceString in device.name:
+#         dev = InputDevice(device.path)
+#     else:
+#         print('No barcode device found')
+#         sys.exit()
+# signal.signal(signal.SIGINT, signal_handler)
+# dev.grab()
+# # process usb hid events and format barcode data
+# barcode = ""
 
-except KeyboardInterrupt:
-    dev.close()
+# try:
+#     for event in dev.read_loop():
+#         if event.type == ecodes.EV_KEY:
+#             data = categorize(event)
+#             if data.keystate == 1 and data.scancode != 42:  # Catch only keydown, and not Enter
+#                 key_lookup = scancodes.get(data.scancode) or u'UNKNOWN:{}'.format(
+#                     data.scancode)  # lookup corresponding ascii value
+#                 if data.scancode == 28:  # if enter detected print barcode value and then clear it
+#                     buff = barcode
+#                     word = buff.split('/')
+#                     # print(barcode)
+#                     barcode = ""
+#                     print(word[3], word[4])
+#                 else:
+#                     barcode += key_lookup  # append character to barcode string
+
+def barcode():
+    def signal_handler(signal, frame):
+        print('Stopping')
+        dev.ungrab()
+        sys.exit(0)
+    devices = map(InputDevice, list_devices())
+    for device in devices:
+        # print(device.name, device.fn)
+        if barCodeDeviceString in device.name:
+            dev = InputDevice(device.path)
+        else:
+            print('No barcode device found')
+            sys.exit()
+    signal.signal(signal.SIGINT, signal_handler)
+    dev.grab()
+    # process usb hid events and format barcode data
+    barcode = ""
+    try:
+        for event in dev.read_loop():
+            if event.type == ecodes.EV_KEY:
+                data = categorize(event)
+                if data.keystate == 1 and data.scancode != 42:  # Catch only keydown, and not Enter
+                    key_lookup = scancodes.get(data.scancode) or u'UNKNOWN:{}'.format(
+                        data.scancode)  # lookup corresponding ascii value
+                    if data.scancode == 28:  # if enter detected print barcode value and then clear it
+                        buff = barcode
+                        word = buff.split('/')
+                        # print(barcode)
+                        barcode = ""
+                        #print(word[3], word[4])
+                        return word
+                    else:
+                        barcode += key_lookup  # append character to barcode string
+
+
+
+    except KeyboardInterrupt:
+        dev.close()

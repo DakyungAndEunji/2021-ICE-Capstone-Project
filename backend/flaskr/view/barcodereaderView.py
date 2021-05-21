@@ -25,6 +25,8 @@ def updateProduct(product_id):
 @api.route('/<int:product_id>', methods = ['DELETE'])
 def deleteProduct(product_id):
     try:
+        qrcode = barcodereaderService.barcode()
+        item = qrcode[4]
 #        item=ProductService.createNewProduct(item)
         return jsonify({"message":"OK"}), 200
     except Exception as e:
