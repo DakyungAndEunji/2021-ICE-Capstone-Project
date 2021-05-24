@@ -1,9 +1,9 @@
 from evdev import InputDevice, ecodes, list_devices, categorize
 import signal, sys
-
+import requests
 from flask import jsonify
-from flaskr import db
-from flaskr.model import Product
+
+sys.path.append("/home/pi/backend/")
 
 barCodeDeviceString = "HID 0581:0106"  # barcode device name
 scancodes = {
@@ -15,7 +15,7 @@ scancodes = {
     40: u'"', 41: u'`', 42: u'LSHFT', 43: u'\\', 44: u'Z', 45: u'X', 46: u'C', 47: u'V', 48: u'B', 49: u'N',
     50: u'M', 51: u',', 52: u'.', 53: u'/', 54: u'RSHFT', 56: u'LALT', 100: u'RALT'
 }
-
+state = 0
 
 def signal_handler(signal, frame):
     print('Stopping')
@@ -23,34 +23,19 @@ def signal_handler(signal, frame):
     sys.exit(0)
 
 
-def update(func, prd_id, state):  # state 기본 값 0 = 입고
-    if func == 'ADD':
-        while state == 1:  # 입고 시작
-            item = Product.query.filter_by(product_id=prd_id).first()
-            if not item:
-                return not_found()
-            item.product_num += 1
-            db.session.commit()
-            response_object = {
-                "status": "success",
-                "message": "Successfully add data",
-            }
-            return jsonify(response_object)
-    elif func == 'DELETE':
-        while state == -1:  # 입고 시작
-            item = Product.query.filter_by(product_id=prd_id).first()
-            if not item:
-                return not_found()
-            item.product_num -= 1
-            db.session.commit()
-            response_object = {
-                "status": "success",
-                "message": "Successfully delete data",
-            }
-            return jsonify(response_object)
+def update(prd_id):
+    try:
+        if state == 1: # start adding
+            return requests.get('http://127.0.0.1:5000/stock/'+prd_id+'/'+'ADD')
+
+        elif state == -1: # start deleting
+            return requests.get('http://127.0.0.1:5000/stock/' + prd_id + '/' + 'DELETE')
+    except Exception as e:
+        print(str(e))
 
 
 def not_found():
+    print("not found")
     response_object = {
         "status": "Not Found",
         "message": "product dosen\'t exist."
@@ -59,7 +44,6 @@ def not_found():
 
 
 if __name__ == '__main__':
-    global state
     devices = map(InputDevice, list_devices())
     for device in devices:
         # print(device.name, device.fn)
@@ -81,20 +65,21 @@ if __name__ == '__main__':
                         data.scancode)  # lookup corresponding ascii value
                     if data.scancode == 28:  # if enter detected print barcode value and then clear it
                         buff = barcode
-                        word = buff.split('/')
                         try:
-                            if word[4] == 'ADD':
+                            if buff == 'ADD':
                                 state = 1
-                            elif word[4] == 'DELETE':
+                            elif buff == 'DELETE':
                                 state = -1
+                            else:
+                                print(update(int(buff)))
                         except Exception as stateError:
-                            print('{} is not available'.format(state))
-
-                        if state == 1 or state == -1:
-                            update(word[4], [5], state)
-                        else:
+                            # print('{} is not available'.format(state))
                             pass
-                        print(barcode)
+
+                        print(state)
+                        print(buff)
+
+                        # print(word[2])
                         barcode = ""
                         # print(word[3], word[4])
 
@@ -104,5 +89,4 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         dev.close()
 
-# 바코드 찍었을 때 /api/product/add/product_id
-# 바코드 찍었을 때 /api/product/delete/product_id
+

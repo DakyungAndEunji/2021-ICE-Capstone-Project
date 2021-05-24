@@ -5,12 +5,14 @@ from flaskr.model import Product
 from flaskr import db
 from . import save_changes
 
+
 def is_integer(string):
-    try: 
+    try:
         int(string)
         return True
     except ValueError:
         return False
+
 
 def verifyType(data):
     for idx, val in data.items():
@@ -21,6 +23,7 @@ def verifyType(data):
         data[idx] = int(val)
     return True
 
+
 def bad_request():
     response_object = {
         "status": "Bad request",
@@ -28,12 +31,14 @@ def bad_request():
     }
     return jsonify(response_object), 400
 
+
 def not_found():
     response_object = {
         "status": "Not Found",
         "message": "product dosen\'t exist."
     }
     return jsonify(response_object), 404
+
 
 def createNewItem(data):
     try:
@@ -60,15 +65,18 @@ def createNewItem(data):
             }
             return jsonify(response_object), 409
     except Exception as e:
-        return { "error":str(e) }, 500
+        return {"error": str(e)}, 500
+
 
 def getAllItems():
     rtn = Product.query.all()
     rtn = [x.as_dict() for x in rtn]
     return jsonify(rtn)
 
+
 def getAItem(id):
     return jsonify(Product.query.filter_by(product_id=id).first().as_dict())
+
 
 def updateItem(id, data):
     try:
@@ -76,14 +84,14 @@ def updateItem(id, data):
             return bad_request()
 
         if 'product_num' in data and data['product_num'] < 0:
-            return bad_request()          
+            return bad_request()
 
         if 'product_id' in data:
             del data['product_id']
 
         item = Product.query.filter_by(product_id=id).first()
         if not item:
-            return not_found()          
+            return not_found()
 
         Product.query.filter_by(product_id=id).update(data)
         db.session.commit()
@@ -91,11 +99,12 @@ def updateItem(id, data):
         response_object = {
             "status": "success",
             "message": "Successfully updated.",
-            "result" : item
+            "result": item
         }
         return jsonify(response_object), 200
     except Exception as e:
-        return { "error":str(e) }, 500   
+        return {"error": str(e)}, 500
+
 
 def deleteItem(id):
     try:
@@ -109,7 +118,40 @@ def deleteItem(id):
         }
         return jsonify(response_object), 204
     except Exception as e:
-        return { "error":str(e) }, 500  
+        return {"error": str(e)}, 500
+
+
+def updateAItem(id, mode):
+    if mode == 'ADD':
+        id = int(id)
+        item = Product.query.get(id)
+        if not item:
+            return not_found()
+        item.product_num += 1
+        db.session.commit()
+        item = Product.query.get(id).as_dict()
+        response_object = {
+            "status": "success",
+            "message": "Successfully updated.",
+            "result": item
+        }
+        return jsonify(response_object), 200
+    elif mode == 'DELETE':
+        item = Product.query.get(id)
+        if not item:
+            return not_found()
+        if item.product_num <= 0:
+            return 'product is empty'
+        item.product_num -= 1
+        db.session.commit()
+        item = Product.query.get(id).as_dict()
+        response_object = {
+            "status": "success",
+            "message": "Successfully updated.",
+            "result": item
+        }
+        return jsonify(response_object), 200
+
 
 def save_changes(data, mode):
     if mode == 1:
