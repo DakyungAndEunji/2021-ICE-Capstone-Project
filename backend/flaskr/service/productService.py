@@ -2,8 +2,9 @@
 
 from flask import jsonify
 from flaskr.model import Product
-from flaskr import db
-from . import save_changes
+from . import orderService
+from .db import *
+from .response import *
 
 
 def is_integer(string):
@@ -23,47 +24,29 @@ def verifyType(data):
         data[idx] = int(val)
     return True
 
-
-def bad_request():
-    response_object = {
-        "status": "Bad request",
-        "message": "Please enter correct value."
-    }
-    return jsonify(response_object), 400
-
-
-def not_found():
-    response_object = {
-        "status": "Not Found",
-        "message": "product dosen\'t exist."
-    }
-    return jsonify(response_object), 404
-
-
 def createNewItem(data):
     try:
         item = Product.query.filter_by(product_name=data['product_name']).first()
         if not item:
             if not verifyType(data):
-                return bad_request()
+                return bad_request("Please enter correct value.")
             new_item = Product(
                 product_name=data['product_name'],
                 product_price=data['product_price'],
                 product_sales=data['product_sales'],
                 product_num=data['product_num']
             )
-            save_changes(new_item, 1)
-            response_object = {
-                "status": "success",
-                "message": "Successfully created."
-            }
-            return jsonify(response_object), 201
+
+            add_commit(new_item)
+
+            if data['product_num']>0:
+                data['product_num'] *= 2
+                orderService.createNewOrder(new_item, data)
+                commit()
+
+            return created()
         else:
-            response_object = {
-                "status": "fail",
-                "message": "Product already exists.",
-            }
-            return jsonify(response_object), 409
+            return conflict("Product already exists.")
     except Exception as e:
         return {"error": str(e)}, 500
 
@@ -75,48 +58,41 @@ def getAllItems():
 
 
 def getAItem(id):
-    return jsonify(Product.query.filter_by(product_id=id).first().as_dict())
+    return jsonify(Product.query.get(id).as_dict())
 
 
 def updateItem(id, data):
     try:
         if not verifyType(data):
-            return bad_request()
+            return bad_request("Please enter correct value.")
 
         if 'product_num' in data and data['product_num'] < 0:
-            return bad_request()
+            return bad_request("Please enter correct value.")       
 
         if 'product_id' in data:
             del data['product_id']
 
-        item = Product.query.filter_by(product_id=id).first()
+        item = Product.query.get(id)
         if not item:
-            return not_found()
+            return not_found("product dosen\'t exist.")          
+
+        orderService.createNewOrder(item, data)
 
         Product.query.filter_by(product_id=id).update(data)
-        db.session.commit()
-        item = Product.query.filter_by(product_id=id).first().as_dict()
-        response_object = {
-            "status": "success",
-            "message": "Successfully updated.",
-            "result": item
-        }
-        return jsonify(response_object), 200
+        commit()
+        item = Product.query.get(id).as_dict()
+        return ok(item, "Successfully updated.")
     except Exception as e:
         return {"error": str(e)}, 500
 
 
 def deleteItem(id):
     try:
-        item = Product.query.filter_by(product_id=id).first()
+        item = Product.query.get(id)
         if not item:
-            return not_found()
-        save_changes(item, 0)
-        response_object = {
-            "status": "success",
-            "message": "Successfully deleted."
-        }
-        return jsonify(response_object), 204
+            return not_found("product dosen\'t exist.")
+        delete_commit()
+        return ok(None, "Successfully deleted.")
     except Exception as e:
         return {"error": str(e)}, 500
 
@@ -126,36 +102,18 @@ def updateAItem(id, mode):
         id = int(id)
         item = Product.query.get(id)
         if not item:
-            return not_found()
+            return not_found("product dosen\'t exist.")
         item.product_num += 1
-        db.session.commit()
+        commit()
         item = Product.query.get(id).as_dict()
-        response_object = {
-            "status": "success",
-            "message": "Successfully updated.",
-            "result": item
-        }
-        return jsonify(response_object), 200
+        return ok(item, "Successfully updated.")
     elif mode == 'DELETE':
         item = Product.query.get(id)
         if not item:
-            return not_found()
+            return not_found("product dosen\'t exist.")
         if item.product_num <= 0:
             return 'product is empty'
         item.product_num -= 1
-        db.session.commit()
+        commit()
         item = Product.query.get(id).as_dict()
-        response_object = {
-            "status": "success",
-            "message": "Successfully updated.",
-            "result": item
-        }
-        return jsonify(response_object), 200
-
-
-def save_changes(data, mode):
-    if mode == 1:
-        db.session.add(data)
-    else:
-        db.session.delete(data)
-    db.session.commit()
+        return ok(item, "Successfully updated.")

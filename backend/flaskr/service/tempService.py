@@ -1,7 +1,7 @@
 from flaskr.model import TempDao
-from flaskr import db
 from flask import Response, jsonify
-from . import save_changes
+from .response import *
+from .db import *
 import time
 import json
 
@@ -16,16 +16,21 @@ import glob
 #device_file = device_folder + '/w1_slave'
 
 
+def is_float(str):
+    try:
+        float(str)
+        return True
+    except ValueError:
+        return False
+
 # custom 400 error handler
 def bad_request():
     return {"status": "Bad request", "message": "Please enter the correct value."}, 400
 
 
 def read_temp():  # 현재 온도 값 가져오기
-    tempRange = TempDao.query.first().as_dict()
-    lines = read_temp_raw()
-    while lines[0].strip()[-3:] != 'YES':
-        time.sleep(0.2)
+    try:
+        tempRange = TempDao.query.first().as_dict()
         lines = read_temp_raw()
     equals_pos = lines[1].find('t=')
     if equals_pos != -1:
@@ -56,59 +61,30 @@ def update_tempRange(data):
         tempRange = TempDao.query.first()
 
         if not tempRange:
-            # if True:
-
-            # temp table has not value
             new_temp = TempDao(upper=data['upper'], lower=data['lower'])
-            db.session.add(new_temp)
-            db.session.commit()
-
-            new_temp = db.session.query(TempDao).first()
-            new_temp.upper = data['upper']
-            new_temp.lower = data['lower']
-            db.session.commit()
+            add_commit(new_temp)
             new_temp = TempDao.query.first().as_dict()
-            response_object = {
-                "status1": "success",
-                "message1": "Successfully updated.",
-                "result1": new_temp  # new_temp  #new_temp.as_dict()
-            }
-            return jsonify(response_object)
+            return created()
 
-            # response_object = {
-            #   "status1": "success",
-            # "message1": "Successfully updated.",
-            # "result1": new_temp  # new_temp.as_dict()
-            # }
-            # return jsonify(response_object)
-
-        else:
-            new_temp = db.session.query(TempDao).first()
+        else:  # same range(upper or lower or both)
+            new_temp = TempDao(tempRange.upper, tempRange.lower)
 
             if 'upper' in data:
-                if str(type(data['upper'])) != "<class 'int'>":
+                if not is_float(data['upper']):
                     return bad_request()
-                new_temp.lower = data['lower']
-                db.session.commit()
-
+                new_temp.upper = float(data['upper'])
             if 'lower' in data:
-                if str(type(data['lower'])) != "<class 'int'>":
+                if not is_float(data['lower']):
                     return bad_request()
-                new_temp.upper = data['upper']
-                db.session.commit()
+                new_temp.lower = float(data['lower'])
 
             if new_temp.upper < new_temp.lower:
                 return bad_request()
 
             new_temp, tempRange = tempRange, new_temp
+            commit()
 
-            response_object = {
-                "status2": "success",
-                "message2": "Successfully updated.",
-                "result2": tempRange.as_dict()
-            }
-
-        return jsonify(response_object), 200
+        return ok(tempRange.as_dict(), "Successfully updated.")
 
     except Exception as e:
         return {"error": str(e)}, 500

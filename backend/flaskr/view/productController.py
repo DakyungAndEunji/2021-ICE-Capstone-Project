@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, Blueprint
+from flask import request
 from flaskr.service import productService
 from flaskr.service import barcodereaderService
 from . import product_api as api
