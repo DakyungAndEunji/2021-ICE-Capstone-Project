@@ -25,15 +25,14 @@
     </v-row>
     <v-row class="text-center mt-3">
       <v-col cols="5" class="mt-2 ml-2"> 현재 설정 범위 : </v-col>
-      <v-col class="mt-2">{{ lower }}°C ~ {{ upper }}°C</v-col>
+      <v-col class="mt-2">{{ range.lower }}°C ~ {{ range.upper }}°C</v-col>
       <v-col>
         <v-btn
           depressed
           @click="
             () => {
               dialog = true;
-              lowerChange = lower;
-              upperChange = upper;
+              range = Object.assign({}, changedRange);
             }
           "
           >수정
@@ -51,14 +50,14 @@
         <v-container>
           <v-text-field
             type="number"
-            v-model="lowerChange"
+            v-model="changedRange.lower"
             label="하한온도"
             :error-messages="errormsg"
             required
           ></v-text-field>
           <v-text-field
             type="number"
-            v-model="upperChange"
+            v-model="changedRange.upper"
             label="상한온도"
             :error-messages="errormsg"
             required
@@ -68,26 +67,48 @@
         </v-container>
       </v-card>
     </v-dialog>
+    <v-snackbar
+      v-model="snackbar.show"
+      :timeout="snackbar.timeout"
+      :color="snackbar.color"
+    >
+      {{ snackbar.text }}
+
+      <template v-slot:action="{ attrs }">
+        <v-btn color="white" icon v-bind="attrs" @click="snackbar.show = false">
+          <v-icon>mdi-close </v-icon>
+        </v-btn>
+      </template>
+    </v-snackbar>
   </v-container>
 </template>
 
 <script>
-//import axios from "axios";
+import axios from "axios";
 
 export default {
   data: () => ({
-    temp: 17,
-    upper: 23,
-    lower: 10,
-    upperChange: 0,
-    lowerChange: 0,
+    temp: 0,
+    range: {
+      upper: 0,
+      lower: 0,
+    },
+    changedRange: {
+      upper: 0,
+      lower: 0,
+    },
     dialog: false,
     errormsg: "",
     isLoading: false,
+    snackbar: {
+      show: false,
+      timeout: 2000,
+      text: "",
+    },
   }),
-  async mounted() {
+  async created() {
     // 현재 온도 값, 설정 범위 값 받아오기
-    this.update();
+    await this.update();
     // 소켓처리 하면 더 좋을텐데..
   },
   computed: {
@@ -97,8 +118,17 @@ export default {
     },
   },
   methods: {
-    update() {},
-    close() {
+    async update() {
+      try {
+        const res = await axios.get("/temp");
+        this.temp = res.data["temp_c"];
+        const res2 = await axios.get("/temp/range");
+        this.range = res2.data;
+      } catch (err) {
+        this.showSnackbar("error", err.message);
+      }
+    },
+    async close() {
       if (
         this.lowerChange === "" ||
         this.upperChange === "" ||
@@ -108,13 +138,15 @@ export default {
         return;
       }
       this.isLoading = true;
-      this.lower = this.lowerChange;
-      this.upper = this.upperChange;
+      this.range.lower = this.lowerChange;
+      this.range.upper = this.upperChange;
       this.errormsg = "";
-      this.update();
       // 서버로 범위 수정 API 보내기.
+      await axios.patch("/temp/range", this.range);
+      this.update();
       this.isLoading = false;
       this.dialog = false;
+      this.showSnackbar("success", "범위 업데이트에 성공했습니다.");
     },
   },
 };
