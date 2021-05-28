@@ -1,11 +1,14 @@
 from flask import request
 from flaskr.service import productService
+from flaskr.service import barcodereaderService
 from . import product_api as api
 
 @api.route('', methods = ['POST'])
 def createProduct():
     try:
-        item = request.json
+        qrcode = barcodereaderService.barcode()
+        item = jsonify(qrcode)
+        #item = request.json
         return productService.createNewItem(item)
     except Exception as e:
         return {"error":str(e)}, 500

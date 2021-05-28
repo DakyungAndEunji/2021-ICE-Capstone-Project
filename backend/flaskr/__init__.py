@@ -34,10 +34,15 @@ def create_app(test_config = None):
     with app.app_context():
         db.create_all()
 
+    from flaskr.service import productService
     from flaskr.view import productController, tempView, orderController
 
     app.register_blueprint(product_api, url_prefix='/api/product')
     app.register_blueprint(temp_api, url_prefix='/api/temp')
     app.register_blueprint(order_api, url_prefix='/api/order')
+
+    @app.route('/stock/<int:product_id>/<string:method>')
+    def passing_product(product_id, method):
+        return productService.updateAItem(product_id, method)
 
     return app

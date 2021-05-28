@@ -5,17 +5,15 @@ from .db import *
 import time
 import json
 
-from sqlalchemy.orm import scoped_session, sessionmaker
-
 import os
 import glob
 
-# os.system('modprobe w1-gpio')
-# os.system('modprobe w1-therm')
+#os.system('modprobe w1-gpio')
+#os.system('modprobe w1-therm')
 
-# base_dir = '/sys/bus/w1/devices/'
-# device_folder = glob.glob(base_dir + '28*')[0]
-# device_file = device_folder + '/w1_slave'
+#base_dir = '/sys/bus/w1/devices/'
+#device_folder = glob.glob(base_dir + '28*')[0]
+#device_file = device_folder + '/w1_slave'
 
 
 def is_float(str):
@@ -34,29 +32,26 @@ def read_temp():  # 현재 온도 값 가져오기
     try:
         tempRange = TempDao.query.first().as_dict()
         lines = read_temp_raw()
-        while lines[0].strip()[-3:] != 'YES':
-            time.sleep(0.2)
-            lines = read_temp_raw()
-        equals_pos = lines[1].find('t=')
-        if equals_pos != -1:
-            temp_string = lines[1][equals_pos + 2:]
-            temp_c = float(temp_string) / 1000.0
-            if temp_c > float(tempRange['upper']) or temp_c < float(tempRange['lower']):
-                # push 알림보내기
-                # return '온도 범위 벗어남', 400
-                d = {'temp_c': temp_c}
-                return jsonify(d)  # 온도 전송됨
+    equals_pos = lines[1].find('t=')
+    if equals_pos != -1:
+        temp_string = lines[1][equals_pos + 2:]
+        temp_c = float(temp_string) / 1000.0
+        if temp_c > float(tempRange['upper']) or temp_c < float(tempRange['lower']):
+            # push 알림보내기
+            return '온도 범위 벗어남', 400
+            # d = {'temp_c': format(temp_c, '.2f')}
+            # return jsonify(d)  # 온도 전송됨
 
-            d = {'temp_c': temp_c}
-            return jsonify(d)
-    except Exception as e:
-        return {"error": str(e)}, 500
+        d = {'temp_c': format(temp_c, '.2f')}
+        return jsonify(d)
+
 
 def read_temp_raw():
     f = open(device_file, 'r')
     lines = f.readlines()
     f.close()
     return lines
+
 
 def update_tempRange(data):
     try:
@@ -67,20 +62,17 @@ def update_tempRange(data):
 
         if not tempRange:
             new_temp = TempDao(upper=data['upper'], lower=data['lower'])
-            db.session.add(new_temp)
-            db.session.commit()
+            add_commit(new_temp)
             new_temp = TempDao.query.first().as_dict()
             return created()
 
         else:  # same range(upper or lower or both)
-
             new_temp = TempDao(tempRange.upper, tempRange.lower)
 
             if 'upper' in data:
                 if not is_float(data['upper']):
                     return bad_request()
                 new_temp.upper = float(data['upper'])
-
             if 'lower' in data:
                 if not is_float(data['lower']):
                     return bad_request()
@@ -90,15 +82,9 @@ def update_tempRange(data):
                 return bad_request()
 
             new_temp, tempRange = tempRange, new_temp
-            db.session.commit()
+            commit()
 
-            response_object = {
-                "status": "success",
-                "message": "Successfully updated.",
-                "result": tempRange.as_dict()
-            }
-
-        return jsonify(response_object), 200
+        return ok(tempRange.as_dict(), "Successfully updated.")
 
     except Exception as e:
         return {"error": str(e)}, 500
@@ -109,3 +95,4 @@ def read_tempRange():
     resp = Response(js, status=200, mimetype='application/json')
     return resp
     # return TempDao.query.first().as_dict()
+
