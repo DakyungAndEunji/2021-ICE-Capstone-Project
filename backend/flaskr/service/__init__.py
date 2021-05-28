@@ -8,4 +8,5 @@ def save_changes(data):
 __all__ = [
   	'productService',
 	'tempService'
+	'orderService'
 ]

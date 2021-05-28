@@ -1,7 +1,7 @@
 from flaskr.model import TempDao
-from flaskr import db
 from flask import Response, jsonify
-from . import save_changes
+from .response import *
+from .db import *
 import time
 import json
 
@@ -31,23 +31,26 @@ def bad_request():
 
 
 def read_temp():  # 현재 온도 값 가져오기
-    tempRange = TempDao.query.first().as_dict()
-    lines = read_temp_raw()
-    while lines[0].strip()[-3:] != 'YES':
-        time.sleep(0.2)
+    try:
+        tempRange = TempDao.query.first().as_dict()
         lines = read_temp_raw()
-    equals_pos = lines[1].find('t=')
-    if equals_pos != -1:
-        temp_string = lines[1][equals_pos + 2:]
-        temp_c = float(temp_string) / 1000.0
-        if temp_c > float(tempRange['upper']) or temp_c < float(tempRange['lower']):
-            # push 알림보내기
-            # return '온도 범위 벗어남', 400
-            d = {'temp_c': temp_c}
-            return jsonify(d)  # 온도 전송됨
+        while lines[0].strip()[-3:] != 'YES':
+            time.sleep(0.2)
+            lines = read_temp_raw()
+        equals_pos = lines[1].find('t=')
+        if equals_pos != -1:
+            temp_string = lines[1][equals_pos + 2:]
+            temp_c = float(temp_string) / 1000.0
+            if temp_c > float(tempRange['upper']) or temp_c < float(tempRange['lower']):
+                # push 알림보내기
+                # return '온도 범위 벗어남', 400
+                d = {'temp_c': temp_c}
+                return jsonify(d)  # 온도 전송됨
 
-        d = {'temp_c': temp_c}
-        return jsonify(d)
+            d = {'temp_c': temp_c}
+            return jsonify(d)
+    except Exception as e:
+        return {"error": str(e)}, 500
 
 def read_temp_raw():
     f = open(device_file, 'r')
@@ -67,12 +70,7 @@ def update_tempRange(data):
             db.session.add(new_temp)
             db.session.commit()
             new_temp = TempDao.query.first().as_dict()
-            response_object = {
-               "status": "success",
-               "message": "Successfully created.",
-               "result": new_temp
-            }
-            return jsonify(response_object)
+            return created()
 
         else:  # same range(upper or lower or both)
 
