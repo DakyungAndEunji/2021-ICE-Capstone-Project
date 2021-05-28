@@ -15,15 +15,16 @@ CREATE TABLE `product` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ----------------------------
--- Table structure for order
+-- Table structure for orders
 -- ----------------------------
-DROP TABLE IF EXISTS `order`;
-CREATE TABLE `order` (
+DROP TABLE IF EXISTS `orders`;
+CREATE TABLE `orders` (
+  `order_id` INTEGER NOT NULL auto_increment COMMENT '주문아이디',
   `order_type` boolean NOT NULL COMMENT '요청구분',
   `order_time` TIMESTAMP NOT NULL COMMENT '주문시간',
-  `product_name` varchar(30) NOT NULL COMMENT '상품명',
+  `product_id` INTEGER NOT NULL COMMENT '상품아이디',
   `order_num` INTEGER NOT NULL DEFAULT 0 COMMENT '주문수량',
-  PRIMARY KEY (`product_name`)
+  PRIMARY KEY (`order_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ----------------------------
