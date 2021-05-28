@@ -3,7 +3,7 @@
 import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flaskr.view import product_api, temp_api
+from flaskr.view import product_api, temp_api, order_api
 
 db = SQLAlchemy()
 
@@ -34,9 +34,10 @@ def create_app(test_config = None):
     with app.app_context():
         db.create_all()
 
-    from flaskr.view import productController, tempView
+    from flaskr.view import productController, tempView, orderController
 
     app.register_blueprint(product_api, url_prefix='/api/product')
     app.register_blueprint(temp_api, url_prefix='/api/temp')
+    app.register_blueprint(order_api, url_prefix='/api/order')
 
     return app
