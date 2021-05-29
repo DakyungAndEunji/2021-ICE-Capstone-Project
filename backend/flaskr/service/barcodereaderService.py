@@ -5,8 +5,6 @@ import requests
 
 from flask import jsonify
 
-import datetime
-
 sys.path.append("/home/pi/backend/")
 
 barCodeDeviceString = "HID 0581:0106"  # barcode device name
