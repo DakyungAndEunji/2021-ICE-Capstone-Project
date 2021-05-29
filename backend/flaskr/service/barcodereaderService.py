@@ -29,22 +29,11 @@ def signal_handler(signal, frame):
 def update(prd_id):
     try:
         if state == 1:
-            # 입고 시작
             return requests.get('http://127.0.0.1:5000/stock/' + prd_id + '/' + 'ADD')
-            # response_object = {
-            #    "status": "success",
-            #   "message": "Successfully add data",
-            # }
-            # return jsonify(response_object)
 
         elif state == -1:
-            # 고 시작
             return requests.get('http://127.0.0.1:5000/stock/' + prd_id + '/' + 'DELETE')
-            # response_object = {
-            #    "status": "success",
-            #    "message": "Successfully delete data",
-            # }
-            #   return jsonify(response_object)
+
     except Exception as e:
         print(str(e))
 
