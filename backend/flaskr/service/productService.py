@@ -67,14 +67,14 @@ def updateItem(id, data):
             return bad_request("Please enter correct value.")
 
         if 'product_num' in data and data['product_num'] < 0:
-            return bad_request("Please enter correct value.")       
+            return bad_request("Please enter correct value.")
 
         if 'product_id' in data:
             del data['product_id']
 
         item = Product.query.get(id)
         if not item:
-            return not_found("product dosen\'t exist.")          
+            return not_found("product dosen\'t exist.")
 
         orderService.createNewOrder(item, data)
 
@@ -97,6 +97,11 @@ def deleteItem(id):
         return {"error": str(e)}, 500
 
 
+id_list = []
+num_list = []
+id_and_num = []
+
+
 def updateAItem(id, mode):
     if mode == 'ADD':
         id = int(id)
@@ -104,7 +109,18 @@ def updateAItem(id, mode):
         if not item:
             return not_found("product dosen\'t exist.")
         item.product_num += 1
-        commit()
+
+        if id in id_list:
+            t = id_list.index(id)
+            num_list[t] += 1
+            print(id_list, num_list)
+        else:
+            num = item.product_num
+            id_list.append(id)
+            num_list.append(num)
+            print(id_list, num_list)
+
+        # db.session.commit()
         item = Product.query.get(id).as_dict()
         return ok(item, "Successfully updated.")
     elif mode == 'DELETE':
@@ -114,6 +130,29 @@ def updateAItem(id, mode):
         if item.product_num <= 0:
             return 'product is empty'
         item.product_num -= 1
-        commit()
+
+        if id in id_list:
+            t = id_list.index(id)
+            num_list[t] -= 1
+            print(id_list, num_list)
+        else:
+            num = item.product_num
+            id_list.append(id)
+            num_list.append(num)
+            print(id_list, num_list)
+
+            # db.session.commit()
         item = Product.query.get(id).as_dict()
         return ok(item, "Successfully updated.")
+
+    elif mode == 'END':
+        cnt = 0
+        for id in id_list:
+            item = Product.query.get(id)
+            if num_list[cnt] < 0:
+                item.product_num = 0
+            else:
+                item.product_num = num_list[cnt]
+                cnt += 1
+
+        commit()
