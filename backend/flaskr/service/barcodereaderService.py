@@ -1,7 +1,11 @@
 from evdev import InputDevice, ecodes, list_devices, categorize
 import signal, sys
+
 import requests
+
 from flask import jsonify
+
+import datetime
 
 sys.path.append("/home/pi/backend/")
 
@@ -17,6 +21,7 @@ scancodes = {
 }
 state = 0
 
+
 def signal_handler(signal, frame):
     print('Stopping')
     dev.ungrab()
@@ -25,11 +30,30 @@ def signal_handler(signal, frame):
 
 def update(prd_id):
     try:
-        if state == 1: # start adding
-            return requests.get('http://127.0.0.1:5000/stock/'+prd_id+'/'+'ADD')
+        if state == 1:
+            # 입고 시작
+            return requests.get('http://127.0.0.1:5000/stock/' + prd_id + '/' + 'ADD')
+            # response_object = {
+            #    "status": "success",
+            #   "message": "Successfully add data",
+            # }
+            # return jsonify(response_object)
 
-        elif state == -1: # start deleting
+        elif state == -1:
+            # 고 시작
             return requests.get('http://127.0.0.1:5000/stock/' + prd_id + '/' + 'DELETE')
+            # response_object = {
+            #    "status": "success",
+            #    "message": "Successfully delete data",
+            # }
+            #   return jsonify(response_object)
+    except Exception as e:
+        print(str(e))
+
+
+def update_end():
+    try:
+        return requests.get('http://127.0.0.1:5000/stock/END')
     except Exception as e:
         print(str(e))
 
@@ -43,50 +67,55 @@ def not_found():
     return jsonify(response_object), 404
 
 
-if __name__ == '__main__':
-    devices = map(InputDevice, list_devices())
-    for device in devices:
-        # print(device.name, device.fn)
-        if barCodeDeviceString in device.name:
-            dev = InputDevice(device.path)
-        else:
-            print('No barcode device found')
-            sys.exit()
-    signal.signal(signal.SIGINT, signal_handler)
-    dev.grab()
-    # process usb hid events and format barcode data
-    barcode = ""
-    try:
-        for event in dev.read_loop():
-            if event.type == ecodes.EV_KEY:
-                data = categorize(event)
-                if data.keystate == 1 and data.scancode != 42:  # Catch only keydown, and not Enter
-                    key_lookup = scancodes.get(data.scancode) or u'UNKNOWN:{}'.format(
-                        data.scancode)  # lookup corresponding ascii value
-                    if data.scancode == 28:  # if enter detected print barcode value and then clear it
-                        buff = barcode
-                        try:
-                            if buff == 'ADD':
-                                state = 1
-                            elif buff == 'DELETE':
-                                state = -1
-                            else:
-                                print(update(int(buff)))
-                        except Exception as stateError:
-                            # print('{} is not available'.format(state))
-                            pass
+devices = map(InputDevice, list_devices())
+for device in devices:
+    # print(device.name, device.fn)
+    if barCodeDeviceString in device.name:
+        dev = InputDevice(device.path)
+    else:
+        print('No barcode device found')
+        sys.exit()
+signal.signal(signal.SIGINT, signal_handler)
+dev.grab()
+# process usb hid events and format barcode data
+barcode = ""
+try:
+    for event in dev.read_loop():
+        if event.type == ecodes.EV_KEY:
+            data = categorize(event)
+            if data.keystate == 1 and data.scancode != 42:  # Catch only keydown, and not Enter
+                key_lookup = scancodes.get(data.scancode) or u'UNKNOWN:{}'.format(
+                    data.scancode)  # lookup corresponding ascii value
+                if data.scancode == 28:  # if enter detected print barcode value and then clear it
+                    buff = barcode
+                    try:
+                        if buff == 'ADD':
+                            state = 1
+                        elif buff == 'DELETE':
+                            state = -1
+                        elif buff == 'END':
+                            state = 0
+                            print(update_end())
+                            print('update done')
 
-                        print(state)
-                        print(buff)
+                        else:
+                            print(update(buff))
+                    except Exception as stateError:
+                        print('state {} is not available'.format(state))
 
-                        # print(word[2])
-                        barcode = ""
-                        # print(word[3], word[4])
+                    print(state)
+                    print(buff)
 
-                    else:
-                        barcode += key_lookup  # append character to barcode string
+                    barcode = ""
 
-    except KeyboardInterrupt:
-        dev.close()
+
+
+                else:
+                    barcode += key_lookup  # append character to barcode string
+
+except KeyboardInterrupt:
+    # dev.close()
+    pass
+
 
 

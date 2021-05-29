@@ -90,6 +90,7 @@ def updateItem(id, data):
             del data['product_id']
 
         item = Product.query.filter_by(product_id=id).first()
+
         if not item:
             return not_found()
 
@@ -121,6 +122,11 @@ def deleteItem(id):
         return {"error": str(e)}, 500
 
 
+id_list = []
+num_list = []
+id_and_num = []
+
+
 def updateAItem(id, mode):
     if mode == 'ADD':
         id = int(id)
@@ -128,7 +134,19 @@ def updateAItem(id, mode):
         if not item:
             return not_found()
         item.product_num += 1
-        db.session.commit()
+
+        if id in id_list:
+            t = id_list.index(id)
+            num_list[t] += 1
+            print(id_list, num_list)
+        else:
+            num = item.product_num
+            print('im in')
+            id_list.append(id)
+            num_list.append(num)
+            print(id_list, num_list)
+
+        # db.session.commit()
         item = Product.query.get(id).as_dict()
         response_object = {
             "status": "success",
@@ -143,7 +161,19 @@ def updateAItem(id, mode):
         if item.product_num <= 0:
             return 'product is empty'
         item.product_num -= 1
-        db.session.commit()
+
+        if id in id_list:
+            t = id_list.index(id)
+            num_list[t] -= 1
+            print(id_list, num_list)
+        else:
+            num = item.product_num
+            print('im in')
+            id_list.append(id)
+            num_list.append(num)
+            print(id_list, num_list)
+
+            # db.session.commit()
         item = Product.query.get(id).as_dict()
         response_object = {
             "status": "success",
@@ -152,6 +182,18 @@ def updateAItem(id, mode):
         }
         return jsonify(response_object), 200
 
+    elif mode == 'END':
+        cnt = 0
+        for id in id_list:
+            item = Product.query.get(id)
+            if num_list[cnt] < 0:
+                item.product_num = 0
+            else:
+                item.product_num = num_list[cnt]
+                cnt += 1
+
+        db.session.commit()
+
 
 def save_changes(data, mode):
     if mode == 1:
@@ -159,3 +201,5 @@ def save_changes(data, mode):
     else:
         db.session.delete(data)
     db.session.commit()
+
+
