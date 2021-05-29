@@ -43,5 +43,8 @@ def create_app(test_config = None):
     @app.route('/stock/<int:product_id>/<string:method>')
     def passing_product(product_id, method):
         return productService.updateAItem(product_id, method)
+    @app.route('/stock/<string:method>')
+    def save_product(method):
+        return productService.updateAItem(0, method)
 
     return app
