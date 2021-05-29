@@ -454,7 +454,7 @@ export default {
         await axios.post("/product", this.createDialog.data);
         await this.initialize();
         this.showSnackbar("success", "상품 생성에 성공했습니다.");
-        this.createDialog.show = false;
+        this.closeProductCreateDialog();
         console.log(this.createDialog.show);
       } catch (err) {
         this.showSnackbar("error", err.message);
@@ -477,7 +477,7 @@ export default {
       }
     },
     async deleteProduct() {
-      // 선택한 제고 삭제
+      // 선택한 재고 삭제
       this.isLoading = true;
       try {
         if (
@@ -511,10 +511,11 @@ export default {
     },
     closeProductUpdateDialog() {
       this.dialog.show = false;
+      this.createDialog.data = null;
       this.dialog.data = null;
     },
     openProductCreateDialog() {
-      this.createDialog.data.product_state = true;
+      this.createDialog.data = {};
       this.createDialog.show = true;
     },
     closeProductCreateDialog() {

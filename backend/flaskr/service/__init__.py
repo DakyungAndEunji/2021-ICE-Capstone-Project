@@ -6,7 +6,8 @@ def save_changes(data):
     db.session.commit()
 
 __all__ = [
-  	'productService',
+  'productService',
 	'tempService',
-    'barcodereaderService'
+  'barcodereaderService'
+	'orderService'
 ]
