@@ -5,7 +5,6 @@ from . import temp_api as api
 @api.route('', methods=['GET'])
 def read_temp():
     try:
-        #return 'hello !!!!!'
         return tempService.read_temp()
     except Exception as e:
         return {'error': str(e)}, 500

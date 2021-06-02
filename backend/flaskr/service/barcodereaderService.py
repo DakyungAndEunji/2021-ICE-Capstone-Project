@@ -95,8 +95,6 @@ try:
 
                     barcode = ""
 
-
-
                 else:
                     barcode += key_lookup  # append character to barcode string
 

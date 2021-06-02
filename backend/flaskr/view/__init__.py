@@ -7,6 +7,6 @@ temp_api = Blueprint('temp_api', __name__)
 
 __all__ = [
   	'productController',
-	'orderController'
+	'orderController',
 	'tempView'
 ]

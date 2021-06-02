@@ -1,9 +1,9 @@
 from flaskr.model import TempDao
-from flask import Response, jsonify
+from flask import Response
 from .response import *
 from .db import *
-import time
 import json
+import time
 
 import os
 import glob
@@ -29,18 +29,19 @@ def bad_request():
 
 
 def read_temp():  # 현재 온도 값 가져오기
-    try:
-        tempRange = TempDao.query.first().as_dict()
+    tempRange = TempDao.query.first().as_dict()
+    lines = read_temp_raw()
+    while lines[0].strip()[-3:] != 'YES':
+        time.sleep(0.2)
         lines = read_temp_raw()
     equals_pos = lines[1].find('t=')
     if equals_pos != -1:
+        time.sleep(180)
         temp_string = lines[1][equals_pos + 2:]
         temp_c = float(temp_string) / 1000.0
         if temp_c > float(tempRange['upper']) or temp_c < float(tempRange['lower']):
             # push 알림보내기
             return '온도 범위 벗어남', 400
-            # d = {'temp_c': format(temp_c, '.2f')}
-            # return jsonify(d)  # 온도 전송됨
 
         d = {'temp_c': format(temp_c, '.2f')}
         return jsonify(d)
@@ -67,9 +68,9 @@ def update_tempRange(data):
             return created()
 
         else:  # same range(upper or lower or both)
-            new_temp = TempDao(tempRange.upper, tempRange.lower)
-
-            if 'upper' in data:
+            new_temp = db.session.query(TempDao).first()
+            
+            if 'upper' in data: # 데이터 동일해도 무조건 upper로 들어오는다..ㅎㅋㅎ하지만 잘 반영되므로 무시하도록 하자
                 if not is_float(data['upper']):
                     return bad_request()
                 new_temp.upper = float(data['upper'])
@@ -94,5 +95,3 @@ def read_tempRange():
     js = json.dumps(TempDao.query.first().as_dict())
     resp = Response(js, status=200, mimetype='application/json')
     return resp
-    # return TempDao.query.first().as_dict()
-

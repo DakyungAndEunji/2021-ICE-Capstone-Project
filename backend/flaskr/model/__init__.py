@@ -5,6 +5,6 @@ from .orderDao import Order
 
 __all__ = [
   	'Product',
-	'TempDao'
+	'TempDao',
 	'Order'
 ]
