@@ -36,6 +36,10 @@
           통계
           <v-icon>mdi-chart-bar</v-icon>
         </v-btn>
+        <v-btn color="white" value="Settings" @click="moveToPage('Settings')">
+          설정
+          <v-icon>mdi-cog</v-icon>
+        </v-btn>
       </v-bottom-navigation>
     </v-footer>
   </v-app>

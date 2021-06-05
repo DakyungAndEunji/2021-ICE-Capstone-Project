@@ -257,7 +257,10 @@
         </v-row>
         <v-row class="mx-2" v-else>
           <v-col>
-            <line-chart :chart-data="tab2.datacollection"></line-chart>
+            <line-chart
+              :chart-data="tab2.datacollection"
+              :options="tab2.options"
+            ></line-chart>
           </v-col>
         </v-row>
       </v-tab-item>
@@ -320,26 +323,18 @@
             로딩중입니다......!
           </v-alert>
         </v-row>
-        <template v-else-if="!!tab3.salesDatacollection">
-          <v-row class="text-center">
-            <v-col> <p class="font-weight-bold title mb-n5">매출액</p></v-col>
-          </v-row>
-          <v-row class="mx-2 text-center">
-            <v-col
-              ><pie-chart
+        <template v-else-if="!pieDataEmptyCheck">
+          <v-row class="text-center mx-5" dense>
+            <v-col>
+              <p class="font-weight-bold title">매출액</p>
+              <pie-chart
                 :chart-data="tab3.salesDatacollection"
                 :options="tab3.options"
               ></pie-chart>
             </v-col>
-          </v-row>
-          <v-row class="text-center">
             <v-col>
-              <p class="font-weight-bold title mb-n5 mt-5">수익</p></v-col
-            >
-          </v-row>
-          <v-row class="mx-2 text-center">
-            <v-col
-              ><pie-chart
+              <p class="font-weight-bold title">수익</p>
+              <pie-chart
                 :chart-data="tab3.incomeDatacollection"
                 :options="tab3.options"
               ></pie-chart>
@@ -380,6 +375,7 @@ export default {
   },
   data() {
     return {
+      err: "",
       tab: null,
       errorMsg: "",
       currentDate: moment().format("YYYY-MM-DD"),
@@ -418,6 +414,23 @@ export default {
           { name: "15개", value: 15 },
           { name: "직접 입력", value: 0 },
         ],
+        options: {
+          maintainAspectRatio: false,
+          plugins: {
+            datalabels: {
+              backgroundColor: function(context) {
+                return context.dataset.backgroundColor;
+              },
+              borderRadius: 4,
+              color: "white",
+              font: {
+                weight: "bold",
+              },
+              formatter: Math.round,
+              padding: 6,
+            },
+          },
+        },
       },
       tab3: {
         menu: false,
@@ -425,6 +438,7 @@ export default {
         salesDatacollection: null,
         incomeDatacollection: null,
         options: {
+          maintainAspectRatio: false,
           plugins: {
             datalabels: {
               backgroundColor: function(context) {
@@ -442,6 +456,7 @@ export default {
               return value > count * 1.5;
             },
             padding: 6,
+            archor: "end",
           },
         },
         labels: [],
@@ -459,10 +474,17 @@ export default {
   async created() {
     await this.updateData();
     await this.updatePeriodData();
+    await this.updateMenuData();
   },
   computed: {
     dateRangeText() {
       return this.tab3.dates.join(" ~ ");
+    },
+    pieDataEmptyCheck() {
+      return (
+        typeof this.tab3.incomeData === "undefined" ||
+        this.tab3.incomeData.length <= 0
+      );
     },
   },
   methods: {
@@ -484,6 +506,7 @@ export default {
         });
       } catch (err) {
         this.showSnackbar("error", err.message);
+        console.log(err);
       }
     },
     showSnackbar(color, text) {
@@ -569,11 +592,16 @@ export default {
         labels: this.tab2.labels,
         datasets: [
           {
+            backgroundColor: "rgb(75, 192, 192)",
             label: "매출액",
             lineTension: 0,
             data: this.tab2.data,
             borderColor: "rgb(75, 192, 192)",
             fill: false,
+            datalabels: {
+              align: "start",
+              anchor: "start",
+            },
           },
         ],
       };
@@ -623,6 +651,9 @@ export default {
               "#CB89A0",
             ],
             hoverOffset: 4,
+            datalabels: {
+              anchor: "end",
+            },
           },
         ],
       };
@@ -642,6 +673,9 @@ export default {
               "rgb(201, 203, 207)",
             ],
             hoverOffset: 4,
+            datalabels: {
+              anchor: "end",
+            },
           },
         ],
       };

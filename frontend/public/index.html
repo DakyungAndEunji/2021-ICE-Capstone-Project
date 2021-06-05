@@ -1,17 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
     <title><%= htmlWebpackPlugin.options.title %></title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css">
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css"
+    />
+    <link rel="manifest" href="manifest.json" />
   </head>
   <body>
+    <script type="text/javascript">
+      document.addEventListener("deviceready", onDeviceReady, false);
+      function onDeviceReady() {
+        console.log(FCMPlugin);
+        FCMPlugin.getToken(
+          async function(token) {
+            console.log("token :" + token);
+            await axios.put(`/setting/token`, token);
+          },
+          function(err) {
+            console.log("error retrieving token: " + err);
+          }
+        );
+        FCMPlugin.onNotification(
+          function(data) {
+            if (data.wasTapped) {
+              console.log("Push Notification tapped", data);
+              alert(JSON.stringify(data));
+            } else {
+              // this will be the state when app is already opened.
+              console.log("Push Notification", data);
+              alert(JSON.stringify(data));
+            }
+          },
+          function(msg) {
+            console.log(
+              "onNotification callback successfully registered: " + msg
+            );
+          },
+          function(err) {
+            console.log("Error registering onNotification callback: " + err);
+          }
+        );
+      }
+    </script>
     <noscript>
-      <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+      <strong
+        >We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work
+        properly without JavaScript enabled. Please enable it to
+        continue.</strong
+      >
     </noscript>
     <div id="app"></div>
     <!-- built files will be auto injected -->

@@ -113,12 +113,10 @@ def updateAItem(id, mode):
         if id in id_list:
             t = id_list.index(id)
             num_list[t] += 1
-            print(id_list, num_list)
         else:
             num = item.product_num
             id_list.append(id)
             num_list.append(num)
-            print(id_list, num_list)
 
         # db.session.commit()
         item = Product.query.get(id).as_dict()
@@ -134,12 +132,10 @@ def updateAItem(id, mode):
         if id in id_list:
             t = id_list.index(id)
             num_list[t] -= 1
-            print(id_list, num_list)
         else:
             num = item.product_num
             id_list.append(id)
             num_list.append(num)
-            print(id_list, num_list)
 
             # db.session.commit()
         item = Product.query.get(id).as_dict()
@@ -148,11 +144,6 @@ def updateAItem(id, mode):
     elif mode == 'END':
         cnt = 0
         for id in id_list:
-            item = Product.query.get(id)
-            if num_list[cnt] < 0:
-                item.product_num = 0
-            else:
-                item.product_num = num_list[cnt]
-                cnt += 1
-
-        commit()
+            item = {'product_id':id, 'product_num':min(num_list[cnt], 0)}
+            updateItem(id, item)
+            cnt += 1

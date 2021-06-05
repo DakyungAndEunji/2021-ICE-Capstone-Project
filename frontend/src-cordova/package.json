@@ -13,31 +13,31 @@
   "author": "Apache Cordova Team",
   "license": "Apache-2.0",
   "devDependencies": {
-    "cordova-android": "^9.0.0",
+    "cordova-android": "^9.1.0",
+    "cordova-browser": "^6.0.0",
     "cordova-plugin-androidx": "^3.0.0",
     "cordova-plugin-androidx-adapter": "^1.1.3",
     "cordova-plugin-fcm": "^2.1.2",
     "cordova-plugin-inappbrowser": "^5.0.0",
     "cordova-plugin-splashscreen": "^6.0.0",
     "cordova-plugin-velda-devicefeedback": "0.0.2",
-    "cordova-plugin-whitelist": "~1.3.4"
+    "cordova-plugin-whitelist": "~1.3.4",
+    "cordova-support-google-services": "^1.4.1"
   },
   "cordova": {
     "plugins": {
       "cordova-plugin-whitelist": {},
-      "cordova-plugin-inappbrowser": {},
-      "cordova-plugin-fcm": {},
       "cordova-plugin-velda-devicefeedback": {},
       "cordova-plugin-splashscreen": {},
-      "cordova-support-google-services": {},
+      "cordova-plugin-androidx-adapter": {},
       "cordova-plugin-androidx": {},
-      "cordova-plugin-androidx-adapter": {}
+      "cordova-plugin-inappbrowser": {},
+      "cordova-support-google-services": {},
+      "cordova-plugin-fcm": {}
     },
     "platforms": [
-      "android"
+      "android",
+      "browser"
     ]
-  },
-  "dependencies": {
-    "cordova-support-google-services": "1.4.1"
   }
 }
