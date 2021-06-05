@@ -31,8 +31,8 @@
           depressed
           @click="
             () => {
+              changedRange = Object.assign({}, range);
               dialog = true;
-              range = Object.assign({}, changedRange);
             }
           "
           >수정
@@ -88,6 +88,7 @@ import axios from "axios";
 
 export default {
   data: () => ({
+    err: "",
     temp: 0,
     range: {
       upper: 0,
@@ -113,7 +114,8 @@ export default {
   },
   computed: {
     tempCheck() {
-      if (this.temp >= this.lower && this.temp <= this.upper) return true;
+      if (this.temp >= this.range.lower && this.temp <= this.range.upper)
+        return true;
       else return false;
     },
   },
@@ -126,9 +128,11 @@ export default {
         this.range = res2.data;
       } catch (err) {
         this.showSnackbar("error", err.message);
+        this.err = err;
       }
     },
     async close() {
+      console.log(this.range);
       if (
         this.lowerChange === "" ||
         this.upperChange === "" ||
@@ -138,8 +142,7 @@ export default {
         return;
       }
       this.isLoading = true;
-      this.range.lower = this.lowerChange;
-      this.range.upper = this.upperChange;
+      this.range = Object.assign({}, this.changedRange);
       this.errormsg = "";
       // 서버로 범위 수정 API 보내기.
       await axios.patch("/temp/range", this.range);

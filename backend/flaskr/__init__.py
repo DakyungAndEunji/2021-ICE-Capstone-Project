@@ -3,13 +3,15 @@
 import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flaskr.view import product_api, temp_api, order_api
+from flaskr.view import product_api, temp_api, order_api, setting_api
+from flask_cors import CORS
 
 db = SQLAlchemy()
 
 def create_app(test_config = None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
+    CORS(app)
     app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:toor!@localhost:3306/tps?charset=utf8'
     #app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:colferpi@localhost:3306/temp?charset=utf8'  # 이건 경이거^^
     app.config['SQLALCHEMY_ECHO'] = True
@@ -40,10 +42,12 @@ def create_app(test_config = None):
     app.register_blueprint(product_api, url_prefix='/api/product')
     app.register_blueprint(temp_api, url_prefix='/api/temp')
     app.register_blueprint(order_api, url_prefix='/api/order')
+    app.register_blueprint(setting_api, url_prefix='/api/setting')
 
     @app.route('/stock/<int:product_id>/<string:method>')
     def passing_product(product_id, method):
         return productService.updateAItem(product_id, method)
+
     @app.route('/stock/<string:method>')
     def save_product(method):
         return productService.updateAItem(0, method)
