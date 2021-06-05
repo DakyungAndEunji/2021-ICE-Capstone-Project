@@ -30,20 +30,16 @@ def bad_request():
 
 def read_temp():  # 현재 온도 값 가져오기
     try:
-        tempRange = TempDao.query.first().as_dict()
         lines = read_temp_raw()
-    equals_pos = lines[1].find('t=')
-    if equals_pos != -1:
-        temp_string = lines[1][equals_pos + 2:]
-        temp_c = float(temp_string) / 1000.0
-        if temp_c > float(tempRange['upper']) or temp_c < float(tempRange['lower']):
-            # push 알림보내기
-            return '온도 범위 벗어남', 400
-            # d = {'temp_c': format(temp_c, '.2f')}
-            # return jsonify(d)  # 온도 전송됨
+        equals_pos = lines[1].find('t=')
+        if equals_pos != -1:
+            temp_string = lines[1][equals_pos + 2:]
+            temp_c = float(temp_string) / 1000.0
+            d = {'temp_c': format(temp_c, '.2f')}
+            return jsonify(d)
 
-        d = {'temp_c': format(temp_c, '.2f')}
-        return jsonify(d)
+    except Exception as e:
+        return {"error": str(e)}, 500            
 
 
 def read_temp_raw():
@@ -57,7 +53,6 @@ def update_tempRange(data):
     try:
         if not data:
             return bad_request()
-
         tempRange = TempDao.query.first()
 
         if not tempRange:
@@ -65,7 +60,6 @@ def update_tempRange(data):
             add_commit(new_temp)
             new_temp = TempDao.query.first().as_dict()
             return created()
-
         else:  # same range(upper or lower or both)
             new_temp = TempDao(tempRange.upper, tempRange.lower)
 
@@ -77,13 +71,12 @@ def update_tempRange(data):
                 if not is_float(data['lower']):
                     return bad_request()
                 new_temp.lower = float(data['lower'])
-
             if new_temp.upper < new_temp.lower:
                 return bad_request()
-
-            new_temp, tempRange = tempRange, new_temp
+            
+            tempRange.lower=new_temp.lower
+            tempRange.upper=new_temp.upper
             commit()
-
         return ok(tempRange.as_dict(), "Successfully updated.")
 
     except Exception as e:

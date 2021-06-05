@@ -5,7 +5,7 @@ import axios from "axios";
 import vuetify from "./plugins/vuetify";
 
 Vue.config.productionTip = false;
-axios.defaults.baseURL = "/api";
+axios.defaults.baseURL = "http://localhost:5000/api";
 axios.defaults.headers.common["Cache-Control"] = "no-cache";
 
 new Vue({
